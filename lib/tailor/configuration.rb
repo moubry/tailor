@@ -196,14 +196,14 @@ class Tailor
     # @param [String] file_expression The String that represents the file set.  This
     #   can be a file, directory, or a (Ruby Dir) glob.
     # @param [Symbol] label The label that represents the file set.
-    def file_set(file_expression='lib/**/*.rb', label=:default)
+    def file_set(file_expression='lib/**/*.rb', label=:default, file_exceptions=[])
       log "file sets before: #{@file_sets}"
       log "file set label #{label}"
       new_style = Style.new
 
       yield new_style if block_given?
 
-      @file_sets[label] = FileSet.new(file_expression, new_style)
+      @file_sets[label] = FileSet.new(file_expression, file_exceptions, new_style)
       log "file sets after: #{@file_sets}"
     end
 
@@ -212,8 +212,8 @@ class Tailor
     #
     # @param [String] file_expression The expression to match recursively.
     # @param [Symbol] label The file set label to use.
-    def recursive_file_set(file_expression, label=:default)
-      file_set("*/**/#{file_expression}", label)
+    def recursive_file_set(file_expression, label=:default, file_exceptions=[])
+      file_set("*/**/#{file_expression}", label, file_exceptions)
     end
 
     # Displays the current configuration as a text table.

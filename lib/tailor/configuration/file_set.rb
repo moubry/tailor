@@ -15,7 +15,7 @@ class Tailor
       # @param [Hash] style Style options to merge into the default Style
       #   settings.
       # @param [String,Array] file_expression
-      def initialize(file_expression=nil, style=nil)
+      def initialize(file_expression=nil, file_exceptions=[], style=nil)
         @style = if style
           Style.new.to_hash.merge(style)
         else
@@ -26,6 +26,7 @@ class Tailor
 
         file_expression ||= DEFAULT_GLOB
         @file_list = build_file_list(file_expression)
+        @file_list = remove_exceptions(@file_list, file_exceptions)
         self[:file_list] = @file_list
       end
 
@@ -80,16 +81,7 @@ class Tailor
           Dir.glob file_expression
         end
 
-        list_with_absolute_paths = []
-
-        files_in_project.each do |file|
-          new_file = File.expand_path(file)
-          log "file: #{new_file}"
-
-          if File.exists? new_file
-            list_with_absolute_paths <<  new_file
-          end
-        end
+        list_with_absolute_paths = get_absolute_paths(files_in_project)
 
         list_with_absolute_paths.sort
       end
@@ -104,6 +96,27 @@ class Tailor
         end
 
         files
+      end
+
+      def remove_exceptions(files, to_remove)
+        get_absolute_paths(to_remove).each { |f| files.delete(f) }
+        files
+      end
+
+      def get_absolute_paths(relative_files)
+        list_with_absolute_paths = []
+
+        relative_files.each do |file|
+          next unless file.is_a? String
+          new_file = File.expand_path(file)
+          log "file: #{new_file}"
+
+          if File.exists? new_file
+            list_with_absolute_paths << new_file
+          end
+        end
+
+        list_with_absolute_paths
       end
     end
   end

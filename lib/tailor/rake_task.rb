@@ -76,8 +76,8 @@ class Tailor
     #
     # @param [String] file_expression
     # @param [Symbol] label
-    def file_set(file_expression, label=:default, &block)
-      @file_sets << [file_expression, label, block]
+    def file_set(file_expression, label=:default, file_exception=[], &block)
+      @file_sets << [file_expression, label, file_exception, block]
     end
 
     # Add a recursive file set to critique, just like you would in a config
@@ -85,8 +85,8 @@ class Tailor
     #
     # @param [String] file_expression
     # @param [Symbol] label
-    def recursive_file_set(file_expression, label=:default, &block)
-      @recursive_file_sets << [file_expression, label, block]
+    def recursive_file_set(file_expression, label=:default, file_exception=[], &block)
+      @recursive_file_sets << [file_expression, label, file_exception, block]
     end
 
     private
@@ -133,7 +133,7 @@ class Tailor
     def create_recursive_file_sets_for config
       unless @recursive_file_sets.empty?
         @recursive_file_sets.each do |fs|
-          config.recursive_file_set(fs[0], fs[1], &fs[2])
+          config.recursive_file_set(fs[0], fs[1], fs[2], &fs[3])
         end
       end
     end
@@ -141,7 +141,7 @@ class Tailor
     # @param [Tailor::Configuration] config
     def create_file_sets_for config
       unless @file_sets.empty?
-        @file_sets.each { |fs| config.file_set(fs[0], fs[1], &fs[2]) }
+        @file_sets.each { |fs| config.file_set(fs[0], fs[1], fs[2], &fs[3]) }
       end
     end
   end
